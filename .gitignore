@@ -5,11 +5,11 @@ node_modules/
 config/config.json
 
 # WhatsApp authentication/session caches
-.webjs_auth/
+.wwebjs_auth/
 .wwebjs_cache/
 
 # LLaMA compiled binaries or other build artifacts
-llama.cpp/build/
+llama.cpp
 
 # Optional logs
 *.log
