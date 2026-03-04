@@ -1,0 +1,19 @@
+# Node modules
+node_modules/
+
+# Config files containing secrets
+config/config.json
+
+# WhatsApp authentication/session caches
+.webjs_auth/
+.wwebjs_cache/
+
+# LLaMA compiled binaries or other build artifacts
+llama.cpp/build/
+
+# Optional logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

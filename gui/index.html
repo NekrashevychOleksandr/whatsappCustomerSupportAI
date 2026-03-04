@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WhatsApp Bot Setup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 28px;
+            color: #0f172a;
+        }
+
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .section-title {
+            margin-top: 30px;
+            font-weight: 600;
+            color: #0f172a;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 8px;
+        }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #334155;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            margin-top: 6px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        textarea { resize: vertical; }
+
+        .button-container {
+            margin-top: 25px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: #fff;
+        }
+
+        button.save { background: #2563eb; }
+        button.start { background: #16a34a; }
+        button.stop { background: #dc2626; }
+
+        .bot-status {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 20px;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .status-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+
+        .online { background: #16a34a; }
+        .offline { background: #dc2626; }
+
+        .log-box {
+            margin-top: 15px;
+            background: #0f172a;
+            color: #22c55e;
+            font-family: monospace;
+            font-size: 13px;
+            padding: 15px;
+            height: 250px;
+            overflow-y: auto;
+            border-radius: 10px;
+            white-space: pre-wrap;
+        }
+
+        .status {
+            margin-top: 15px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <h1>WhatsApp Bot Setup</h1>
+    <div class="subtitle">Configure your WhatsApp Bot</div>
+
+    <div class="section-title">Business Details</div>
+    <label>Business Name</label>
+    <input id="businessName">
+
+    <label>Business Email</label>
+    <input id="businessEmail">
+
+    <label>Business Info</label>
+    <textarea id="businessInfo" rows="4"></textarea>
+
+    <div class="section-title">Bot Configuration</div>
+    <label>Bot Name</label>
+    <input id="botName">
+
+    <label>Bot Email (Gmail)</label>
+    <input id="botEmail">
+
+    <label>Bot Email App Password</label>
+    <input id="botEmailPassword" type="password">
+
+    <label>Bot Personality</label>
+    <textarea id="personality" rows="4"></textarea>
+
+    <div class="button-container">
+        <button class="save" onclick="saveConfig()">Save Configuration</button>
+    </div>
+
+    <div class="section-title">Bot Control</div>
+
+    <div class="bot-status">
+        <span class="status-dot offline" id="botStatusDot"></span>
+        <span id="botStatusText">Offline</span>
+    </div>
+
+    <div class="button-container">
+        <button class="start" onclick="startBot()">Start Bot</button>
+        <button class="stop" onclick="stopBot()">Stop Bot</button>
+    </div>
+
+    <div class="log-box" id="logBox">Bot logs will appear here...</div>
+
+    <div class="status" id="status"></div>
+</div>
+
+<script>
+async function loadConfig() {
+    const res = await fetch('/api/config');
+    const config = await res.json();
+    for (const key in config) {
+        if (document.getElementById(key)) {
+            document.getElementById(key).value = config[key];
+        }
+    }
+}
+
+async function saveConfig() {
+    const config = {
+        businessName: businessName.value,
+        businessEmail: businessEmail.value,
+        botEmail: botEmail.value,
+        botEmailPassword: botEmailPassword.value,
+        botName: botName.value,
+        businessInfo: businessInfo.value,
+        personality: personality.value
+    };
+
+    await fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config)
+    });
+
+    status.innerText = "✔ Configuration saved!";
+}
+
+function setBotStatus(online) {
+    const dot = document.getElementById('botStatusDot');
+    const text = document.getElementById('botStatusText');
+
+    if (online) {
+        dot.classList.remove('offline');
+        dot.classList.add('online');
+        text.innerText = 'Online';
+    } else {
+        dot.classList.remove('online');
+        dot.classList.add('offline');
+        text.innerText = 'Offline';
+    }
+}
+
+async function startBot() {
+    await fetch('/start-bot', { method: 'POST' });
+}
+
+async function stopBot() {
+    await fetch('/stop-bot', { method: 'POST' });
+}
+
+async function updateStatus() {
+    const res = await fetch('/bot-status');
+    const data = await res.json();
+    setBotStatus(data.running);
+}
+
+async function updateLogs() {
+    const res = await fetch('/bot-logs');
+    const data = await res.json();
+    const box = document.getElementById('logBox');
+    box.innerText = data.logs;
+    box.scrollTop = box.scrollHeight;
+}
+
+// Auto refresh
+setInterval(updateStatus, 3000);
+setInterval(updateLogs, 2000);
+
+loadConfig();
+updateStatus();
+updateLogs();
+</script>
+
+</body>
+</html>
