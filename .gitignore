@@ -9,7 +9,17 @@ config/config.json
 .wwebjs_cache/
 
 # LLaMA compiled binaries or other build artifacts
-llama.cpp
+# LLaMA.cpp build artifacts
+llama.cpp/build/
+llama.cpp/bin/
+llama.cpp/*.exe
+llama.cpp/*.o
+llama.cpp/*.obj
+
+# Temporary files
+llama.cpp/*.log
+llama.cpp/*.tmp
+llama.cpp/*.out
 
 # Optional logs
 *.log
