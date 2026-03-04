@@ -51,8 +51,6 @@ http://localhost:3000
 
 # Notes
 
-# Notes
-
 - `llama.cpp` must be built/compiled before first use.
 - Users connect the WhatsApp account to be controlled by the bot by scanning the QR code displayed when the bot starts for the first time.
 - If using Gmail, create an App Password for the email address the bot will use.
