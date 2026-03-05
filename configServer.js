@@ -60,11 +60,6 @@ app.post('/start-bot', (req, res) => {
     });
 
     // Capture STDERR
-    botProcess.stderr.on('data', (data) => {
-        const message = data.toString();
-        addLog("[ERROR] " + message);
-        console.error(message);
-    });
 
     botProcess.on('close', (code) => {
         addLog(`Bot exited with code ${code}`);

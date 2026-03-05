@@ -16,6 +16,13 @@
             min-height: 100vh;
         }
 
+        /* Make these two sections bigger */
+        #businessInfo,
+        #personality {
+            min-height: 240px;
+            font-size: 14px;
+        }
+
         .container {
             width: 100%;
             max-width: 800px;
@@ -109,19 +116,28 @@
             margin-top: 15px;
             background: #0f172a;
             color: #22c55e;
-            font-family: monospace;
-            font-size: 13px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 11px;            /* smaller for QR fit */
             padding: 15px;
-            height: 250px;
+            height: 450px;              /* MUCH taller */
             overflow-y: auto;
             border-radius: 10px;
-            white-space: pre-wrap;
+            white-space: pre;           /* IMPORTANT for QR formatting */
+            line-height: 1.1;           /* tighter block rendering */
         }
 
         .status {
             margin-top: 15px;
             font-weight: 600;
         }
+
+        /* Darken and press effect on click */
+        button:active {
+            filter: brightness(85%);
+            transform: scale(0.97);
+            transition: transform 0.05s, filter 0.05s;
+        }
+
     </style>
 </head>
 
@@ -239,8 +255,16 @@ async function updateLogs() {
     const res = await fetch('/bot-logs');
     const data = await res.json();
     const box = document.getElementById('logBox');
+
+    // Check if user is near bottom BEFORE updating
+    const isNearBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 20;
+
     box.innerText = data.logs;
-    box.scrollTop = box.scrollHeight;
+
+    // Only auto-scroll if they were already at bottom
+    if (isNearBottom) {
+        box.scrollTop = box.scrollHeight;
+    }
 }
 
 // Auto refresh
