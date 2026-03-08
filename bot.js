@@ -32,20 +32,19 @@ const transporter = nodemailer.createTransport({
 const BUSINESS_EMAIL = config.businessEmail;
 
 const SYSTEM_PROMPT = `
-You are ${config.botName}, a WhatsApp customer support assistant for ${config.businessName}.
-Business info:
-${config.businessInfo}
-
-Personality:
-${config.personality}
+You are ${config.botName}, a WhatsApp assistant for ${config.businessName}.
+Business: ${config.businessInfo}
+Personality: ${config.personality}
 
 Rules:
-- Do not invent services or capabilities not listed
+- Do not invent services
 - Do not give prices
-- If unsure, ask for clarification
-- Guide users toward booking a consultation
-- Be concise, confident, and professional
-- If the customer wants to speak to a human, inform them that they simply need to write 'speak to human' and it will alert a human represenative to join the chat.
+- Ask for clarification if unsure
+- Be concise and professional
+- Be friendly and kind
+- Encourage booking consultations
+- If user writes "speak to a human", a human will be notified
+- Try to respond in a way as human as possible, do not specify that you have no feelings or emotions.
 `;
 //--------------------------------------------------------------------------------------
 
@@ -63,7 +62,7 @@ function startLlamaServer() {
         '--port', LLAMA_PORT,
         '--ctx-size', '512',
         '--threads', '8',
-        '--batch-size', '128',
+        '--batch-size', '256',
         '--n-predict', '64',
         '--top-k', '20',
         '--top-p', '0.8',
@@ -143,7 +142,7 @@ client.on('ready', () => {
 // user tracking and memory 
 const userData = {};
 const INACTIVITY_LIMIT = 30 * 60 * 1000; // 30 min
-const MEMORY_SIZE = 6; // store last 6 messages per user
+const MEMORY_SIZE = 4; // store last 6 messages per user
 
 // Scores the client for how important and good the client is
 function scoreLead(conversation) {
@@ -154,7 +153,7 @@ function scoreLead(conversation) {
     if (/(quote|price|cost)/.test(text)) score += 3;
     if (/(install|setup|repair|fix|support)/.test(text)) score += 3;
     if (/(urgent|asap|today|immediately)/.test(text)) score += 2;
-    if (/(speak to human|call me)/.test(text)) score += 3;
+    if (/(speak to a human|call me)/.test(text)) score += 3;
 
     if (score >= 6) return 'HOT 🔥';
     if (score >= 3) return 'WARM ⚠️';
@@ -175,7 +174,7 @@ function queryLLM(conversationHistory) {
         const promptText = SYSTEM_PROMPT + '\n' + conversationHistory.map(m => `${m.role}: ${m.content}`).join('\n') + '\nAssistant:';
         const postData = JSON.stringify({
             prompt: promptText,
-            n_predict: 100,
+            n_predict: 64,
             temperature: 0.6,
             top_k: 20,
             top_p: 0.8,
@@ -197,11 +196,26 @@ function queryLLM(conversationHistory) {
 
         const req = http.request(options, (res) => {
             let data = '';
+
+            
             res.on('data', chunk => data += chunk);
             res.on('end', () => {
                 try {
+
+                    if (res.statusCode !== 200) {
+                        console.error("LLM HTTP error:", res.statusCode);
+                    }
+
                     const json = JSON.parse(data);
+
+                    if (!json || !json.content) {
+                        console.error("Invalid LLM response:", json);
+                        return reject(new Error("Invalid LLM response"));
+                    }
+
                     resolve(json.content.trim());
+
+
                 } catch (err) {
                     reject(err);
                 }
@@ -354,12 +368,6 @@ client.on('message', async (message) => {
         /(immediately)/i
     ];
 
-    if (urgentPatterns.some(p => p.test(message.body))) {
-        await message.reply(
-            `⚠️ I understand this may be urgent.\n\n` +
-            `Please describe the issue in detail, and I will prioritize notifying our technical team.`
-        );
-    }
 
 
 
@@ -379,7 +387,7 @@ client.on('message', async (message) => {
     if (user.conversation.length > MEMORY_SIZE) user.conversation.shift();
 
     // Human handoff
-    if (message.body.toLowerCase().includes('speak to human')) {
+    if (message.body.toLowerCase().includes('speak to a human')) {
         if (!user.humanActive) {
             user.humanActive = true;
 
@@ -448,7 +456,7 @@ client.on('message', async (message) => {
         if (isServiceRequest) {
             // Ask user to describe the service
             await message.reply(
-                "Thanks! Could you please describe the service or task you would like UB Solutions to assist with? Please provide as much detail as possible."
+                "Could you please describe the service or task you would like UB Solutions to assist with? Please provide as much detail as possible."
             );
             user.pendingServiceRequest = true;
         } else {
