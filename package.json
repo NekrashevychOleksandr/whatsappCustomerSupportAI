@@ -6,7 +6,8 @@
   "type": "commonjs",
   "scripts": {
     "start": "bot.js",
-    "dev": "bot.js"
+    "dev": "bot.js",
+    "test": "jest --runInBand"
   },
   "repository": {
     "type": "git",
@@ -36,5 +37,8 @@
     "qrcode": "^1.5.4",
     "qrcode-terminal": "^0.12.0",
     "whatsapp-web.js": "^1.34.1"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2"
   }
 }

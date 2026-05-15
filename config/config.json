@@ -1,0 +1,13 @@
+{
+  "GROQ_MODEL": "llama-3.3-70b-versatile",
+
+  "BOT_NAME": "Support Assistant",
+  "BUSINESS_NAME": "My Business",
+
+  "BUSINESS_EMAIL_SUPPORT": "support@yourbusiness.com",
+  "BUSINESS_EMAIL_SALES": "sales@yourbusiness.com",
+  "BUSINESS_EMAIL_COMPLAINTS": "complaints@yourbusiness.com",
+  "BUSINESS_EMAIL_HUMAN": "human@yourbusiness.com",
+
+  "WHATSAPP_SESSION_NAME": "workflow-bot"
+}

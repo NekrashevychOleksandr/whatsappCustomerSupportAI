@@ -1,9 +1,6 @@
 # Node modules
 node_modules/
 
-# Config files containing secrets
-config/config.json
-
 # WhatsApp authentication/session caches
 .wwebjs_auth/
 .wwebjs_cache/
@@ -23,6 +20,9 @@ llama.cpp/*.out
 
 # Optional logs
 *.log
+
+# Env
+.env
 
 # OS files
 .DS_Store
